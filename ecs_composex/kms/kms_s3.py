@@ -8,7 +8,7 @@ Handle x-kms in S3 buckets
 from troposphere import Ref
 
 from ..common.troposphere_tools import add_parameters
-from .kms_params import KMS_KEY_ID
+from .kms_params import KMS_KEY_ARN
 
 KEY = "KMSMasterKeyID"
 
@@ -22,15 +22,15 @@ def assign_kms_key_to_bucket(kms_key, bucket_rule, bucket_stack):
     :param ecs_composex.s3.s3_stack.XStack bucket_stack:
     :return:
     """
-    kms_key_id = kms_key.attributes_outputs[KMS_KEY_ID]
-    add_parameters(bucket_stack.stack_template, [kms_key_id["ImportParameter"]])
+    kms_key_arn = kms_key.attributes_outputs[KMS_KEY_ARN]
+    add_parameters(bucket_stack.stack_template, [kms_key_arn["ImportParameter"]])
     setattr(
         bucket_rule.ServerSideEncryptionByDefault,
         "KMSMasterKeyID",
-        Ref(kms_key_id["ImportParameter"]),
+        Ref(kms_key_arn["ImportParameter"]),
     )
     bucket_stack.Parameters.update(
-        {kms_key_id["ImportParameter"].title: kms_key_id["ImportValue"]}
+        {kms_key_arn["ImportParameter"].title: kms_key_arn["ImportValue"]}
     )
     setattr(bucket_rule.ServerSideEncryptionByDefault, "SSEAlgorithm", "aws:kms")
 
